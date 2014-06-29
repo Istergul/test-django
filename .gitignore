@@ -1,0 +1,6 @@
+*.pyc
+*.pyc*
+*.swp
+project/static/js/vendor/*
+venv/*
+.idea/*

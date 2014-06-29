@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta charset="utf-8">
+  <title>test</title>
+  <style>
+    /*.ng-valid.ng-dirty { border: solid green 3px; }*/
+    /*.ng-invalid.ng-dirty { border: solid red 3px; }*/
+    body { width:850px; }
+      .sideBar { width: 100px; float:left; }
+      .tabs {width: 700px; float: right;}
+  </style>
+</head>
+<body ng-app="app">
+
+    <div data-ng-controller="ContainerCtrl">
+        <div class="sideBar">
+            <a href="#" data-ng-click="selectTab('users', $event)">Пользователи</a>
+            <a href="#" data-ng-click="selectTab('rooms', $event)">Комнаты</a>
+        </div>
+
+        <div class="tabs">
+        <div ng-switch="activeTab">
+            <div data-ng-controller="UserCtrl" ng-switch-when="users">
+                <h2>Пользователи</h2>
+
+                <table border="1">
+                    <tr>
+                        <td>id</td>
+                        <td>Имя</td>
+                        <td>Зарплата</td>
+                        <td>Дата поступления на работу</td>
+                    </tr>
+                    <tr data-ng-repeat="user in users" data-ng-form="updateUserForm">
+                        <td data-ng-bind="user.id"></td>
+                        <td>
+                            <span data-ng-bind="user.name" data-ng-click="updateField(user, 'name')" data-ng-hide="isShowField(user.id, 'name')"></span>
+                            <div data-ng-show="isShowField(user.id, 'name')">
+                                <input type="text" data-ng-model="user.name" name="name" data-ng-keypress="updateUser(user, 'name', $event)" data-ng-maxlength="255" required novalidate /><br />
+                                <span data-ng-show="showError(updateUserForm.name, 'required')">Данное поле является обязательным</span>
+                                <span data-ng-show="showError(updateUserForm.name, 'maxlength')">Данное поле слишком длинное</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span data-ng-bind="user.paycheck" data-ng-click="updateField(user, 'paycheck')" data-ng-hide="isShowField(user.id, 'paycheck')"></span>
+                            <div data-ng-show="isShowField(user.id, 'paycheck')">
+                                <input type="text" data-ng-model="user.paycheck" name="paycheck" data-ng-pattern="/^\d+$/" data-ng-keypress="updateUser(user, 'paycheck', $event)" data-ng-maxlength="10" required novalidate /><br />
+                                <span data-ng-show="showError(updateUserForm.paycheck, 'required')">Данное поле является обязательным</span>
+                                <span data-ng-show="showError(updateUserForm.paycheck, 'pattern')">Данное поле содержит недопустимые символы</span>
+                                <span data-ng-show="showError(updateUserForm.paycheck, 'maxlength')">Данное поле слишком длинное</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span data-ng-bind="user.date_joined" data-ng-click="updateField(user, 'date_joined')" data-ng-hide="isShowField(user.id, 'date_joined')"></span>
+                            <div data-ng-show="isShowField(user.id, 'date_joined')">
+                                <input type="date" data-ng-model="user.date_joined" name="date_joined" data-ng-keypress="updateUser(user, 'date_joined', $event)" required novalidate /><br />
+                                <span data-ng-show="showError(updateUserForm.date_joined, 'required')">Данное поле является обязательным</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <form name="newUserForm">
+                <table>
+                    <caption>Новый пользователь</caption>
+                    <tr>
+                        <td>Имя</td>
+                        <td>
+                            <input type="text" data-ng-model="newUser.name" name="name" data-ng-maxlength="255" required novalidate />
+                            <span data-ng-show="showError(newUserForm.name, 'required')">Данное поле является обязательным</span>
+                            <span data-ng-show="showError(newUserForm.name, 'maxlength')">Данное поле слишком длинное</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Зарплата</td>
+                        <td>
+                            <input type="text" data-ng-model="newUser.paycheck" data-ng-pattern="/^\d+$/" name="paycheck" data-ng-maxlength="10" required novalidate />
+                            <span data-ng-show="showError(newUserForm.paycheck, 'required')">Данное поле является обязательным</span>
+                            <span data-ng-show="showError(newUserForm.paycheck, 'pattern')">Данное поле содержит недопустимые символы</span>
+                            <span data-ng-show="showError(newUserForm.paycheck, 'maxlength')">Данное поле слишком длинное</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Дата поступления</td>
+                        <td>
+                            <input type="date" data-ng-model="newUser.date_joined" name="date_joined" required novalidate />
+                            <span data-ng-show="showError(newUserForm.date_joined, 'required')">Данное поле является обязательным</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="button" value="Добавить" data-ng-click="addNewUser(newUser)" data-ng-disabled="!canSave()" />
+                        </td>
+                    </tr>
+                </table>
+                </form>
+
+            </div>
+
+            <div data-ng-controller="RoomCtrl" ng-switch-when="rooms">
+                <h2>Комнаты</h2>
+
+                <table border="1">
+                    <tr>
+                        <td>id</td>
+                        <td>Отдел</td>
+                        <td>Вместимость</td>
+                    </tr>
+                    <tr data-ng-repeat="room in rooms" data-ng-form="updateRoomForm">
+                        <td data-ng-bind="room.id"></td>
+                        <td>
+                            <span data-ng-bind="room.department" data-ng-click="updateField(room, 'department')" data-ng-hide="isShowField(room.id, 'department')"></span>
+                            <div data-ng-show="isShowField(room.id, 'department')">
+                                <input type="text" data-ng-model="room.department" name="department" data-ng-keypress="updateRoom(room, 'department', $event)" data-ng-maxlength="255" required novalidate /><br />
+                                <span data-ng-show="showError(updateRoomForm.department, 'required')">Данное поле является обязательным</span>
+                                <span data-ng-show="showError(updateRoomForm.department, 'maxlength')">Данное поле слишком длинное</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span data-ng-bind="room.spots" data-ng-click="updateField(room, 'spots')" data-ng-hide="isShowField(room.id, 'spots')"></span>
+                            <div data-ng-show="isShowField(room.id, 'spots')">
+                                <input type="text" data-ng-model="room.spots" name="spots" data-ng-pattern="/^\d+$/" data-ng-keypress="updateRoom(room, 'spots', $event)" data-ng-maxlength="10" required novalidate /><br />
+                                <span data-ng-show="showError(updateRoomForm.spots, 'required')">Данное поле является обязательным</span>
+                                <span data-ng-show="showError(updateRoomForm.spots, 'pattern')">Данное поле содержит недопустимые символы</span>
+                                <span data-ng-show="showError(updateRoomForm.spots, 'maxlength')">Данное поле слишком длинное</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <form name="newRoomForm">
+                <table>
+                    <caption>Новая комната</caption>
+                    <tr>
+                        <td>Отдел</td>
+                        <td>
+                            <input type="text" data-ng-model="newRoom.department" name="department" data-ng-maxlength="255" required novalidate />
+                            <span data-ng-show="showError(newRoomForm.department, 'required')">Данное поле является обязательным</span>
+                            <span data-ng-show="showError(newRoomForm.department, 'maxlength')">Данное поле слишком длинное</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Вместимость</td>
+                        <td>
+                            <input type="text" data-ng-model="newRoom.spots" data-ng-pattern="/^\d+$/" name="spots" data-ng-maxlength="10" required novalidate />
+                            <span data-ng-show="showError(newRoomForm.spots, 'required')">Данное поле является обязательным</span>
+                            <span data-ng-show="showError(newRoomForm.spots, 'pattern')">Данное поле содержит недопустимые символы</span>
+                            <span data-ng-show="showError(newRoomForm.spots, 'maxlength')">Данное поле слишком длинное</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="button" value="Добавить" data-ng-click="addNewRoom(newRoom)" data-ng-disabled="!canSave()" />
+                        </td>
+                    </tr>
+                </table>
+                </form>
+            </div>
+        </div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript" src="/static/js/vendor/angular/angular.js"></script>
+    <script type="text/javascript" src="/static/js/vendor/angular-cookies/angular-cookies.js"></script>
+    <script type="text/javascript" src="/static/js/src/app.js"></script>
+</body>
+</html>
